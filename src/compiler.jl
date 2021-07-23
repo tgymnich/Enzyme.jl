@@ -1330,6 +1330,15 @@ function GPUCompiler.codegen(output::Symbol, job::CompilerJob{<:EnzymeTarget};
 
         sparam_vals = mi.specTypes.parameters[2:end] # mi.sparam_vals
 
+        # Since this is noreturn, it can't write to any operations in the function
+        # in a way accessible by the function. Ideally the attributor should actually
+        # handle this and similar not impacting the read/write behavior of the calling
+        # fn, but it doesn't presently so for now we will ensure this by hand
+        if func == Base.Checked.throw_overflowerr_binaryop
+            llvmfn = functions(mod)[k.specfunc]
+            push!(function_attributes(llvmfn), EnumAttribute("readonly"; ctx))
+            continue
+        end
         if func == Base.println
             llvmfn = functions(mod)[k.specfunc]
             push!(function_attributes(llvmfn), StringAttribute("enzyme_inactive"; ctx))
