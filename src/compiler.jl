@@ -4,6 +4,8 @@ import ..Enzyme: Const, Active, Duplicated, DuplicatedNoNeed, Annotation, guess_
 import ..Enzyme: API, TypeTree, typetree, only!, shift!, data0!,
                  TypeAnalysis, FnTypeInfo, Logic, allocatedinline
 
+import ..Enzyme: EnzymeRules
+
 using LLVM, GPUCompiler, Libdl
 import Enzyme_jll
 

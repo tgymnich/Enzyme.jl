@@ -89,6 +89,8 @@ function guess_activity(T, Mode=API.DEM_ReverseModeCombined)
     end
 end
 
+include("rules.jl")
+
 import LLVM
 
 include("api.jl")
