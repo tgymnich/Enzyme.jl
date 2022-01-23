@@ -3235,7 +3235,12 @@ function GPUCompiler.codegen(output::Symbol, job::CompilerJob{<:EnzymeTarget};
     actualRetType = nothing
     for (mi, k) in meta.compiled
         k_name = GPUCompiler.safe_name(k.specfunc)
-        haskey(functions(mod), k_name) || continue
+        if has_rule(mi.specTypes)
+            @warn "Rule support not yet implemented"
+            continue
+        elseif !haskey(functions(mod), k_name)
+            continue
+        end
 
         llvmfn = functions(mod)[k_name]
         if llvmfn == primalf
@@ -3264,7 +3269,6 @@ function GPUCompiler.codegen(output::Symbol, job::CompilerJob{<:EnzymeTarget};
             must_wrap |= llvmfn == primalf
             nothing
         end
-
 
         sparam_vals = mi.specTypes.parameters[2:end] # mi.sparam_vals
         if func == Base.println || func == Base.print || func == Base.show ||
