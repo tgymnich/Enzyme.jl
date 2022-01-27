@@ -77,7 +77,7 @@ function guess_activity(T, Mode=API.DEM_ReverseModeCombined)
         else
             return Active{T}
         end
-    elseif T <: AbstractArray
+    elseif T <: AbstractArray || T <: Any
         if Mode == API.DEM_ForwardMode
             return DuplicatedNoNeed{T}
         else

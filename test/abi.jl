@@ -11,9 +11,6 @@ using Test
     
     @test () === fwddiff(f, Const, Const(nothing))
 
-    res = autodiff(f, Const(nothing))
-    @test res === ()
-    
     @test () === fwddiff(f, Const(nothing))
 
     res = Enzyme.autodiff_deferred(f, Const(nothing))
