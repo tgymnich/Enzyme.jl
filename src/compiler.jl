@@ -1656,7 +1656,9 @@ function arraycopy_augfwd(B::LLVM.API.LLVMBuilderRef, OrigCI::LLVM.API.LLVMValue
  
     unsafe_store!(shadowR, shadowres.ref)
 
-    arraycopy_common(#=fwd=#true, LLVM.Builder(B), orig, origops[1], gutils)
+    if API.EnzymeGradientUtilsIsConstantValue(gutils, origops[1]) == 0
+      arraycopy_common(#=fwd=#true, LLVM.Builder(B), orig, origops[1], gutils)
+    end
 	
 	return nothing
 end
@@ -1664,7 +1666,11 @@ end
 function arraycopy_rev(B::LLVM.API.LLVMBuilderRef, OrigCI::LLVM.API.LLVMValueRef, gutils::API.EnzymeGradientUtilsRef, tape::LLVM.API.LLVMValueRef)::Cvoid
     orig = LLVM.Instruction(OrigCI)
     origops = LLVM.operands(orig)
-    arraycopy_common(#=fwd=#false, LLVM.Builder(B), orig, origops[1], gutils)
+    
+    if API.EnzymeGradientUtilsIsConstantValue(gutils, origops[1]) == 0
+      arraycopy_common(#=fwd=#false, LLVM.Builder(B), orig, origops[1], gutils)
+    end
+
     return nothing
 end
 
@@ -2313,6 +2319,14 @@ function annotate!(mod, mode)
             fn = fns[boxfn]
             push!(return_attributes(fn), LLVM.EnumAttribute("noalias", 0; ctx))
             push!(function_attributes(fn), LLVM.EnumAttribute("inaccessiblememonly", 0; ctx))
+        end
+    end
+    
+    for boxfn in ("jl_array_copy", "ijl_array_copy")
+        if haskey(fns, boxfn)
+            fn = fns[boxfn]
+            push!(return_attributes(fn), LLVM.EnumAttribute("noalias", 0; ctx))
+            push!(function_attributes(fn), LLVM.EnumAttribute("inaccessiblemem_or_argmemonly", 0; ctx))
         end
     end
 
