@@ -2785,7 +2785,6 @@ function enzyme!(job, mod, primalf, adjoint, mode, width, parallel, actualRetTyp
         returnUsed = !(GPUCompiler.isghosttype(actualRetType) || Core.Compiler.isconstType(actualRetType)) 
         shadowReturnUsed = returnUsed && (retType == API.DFT_DUP_ARG || retType == API.DFT_DUP_NONEED)
         returnUsed &= retType != API.DFT_DUP_NONEED
-        # TODO handle non-1 width
         augmented = API.EnzymeCreateAugmentedPrimal(
             logic, primalf, retType, args_activity, TA, #=returnUsed=# returnUsed,
             #=shadowReturnUsed=#shadowReturnUsed,
@@ -2921,7 +2920,7 @@ function create_abi_wrapper(enzymefn::LLVM.Function, F, argtypes, rettype, actua
         llvmT = isboxed ? T_prjlvalue : convert(LLVMType, actualRetType; ctx)
         
         # primal return
-        if existed[2] != 0 && 
+        if existed[2] != 0 
             push!(T_JuliaSRet, llvmT)
         end
         # shadow return
@@ -4016,7 +4015,7 @@ end
     end
 end
 
-@inline function thunk(f::F,df::DF, ::Type{A}, tt::Type{TT},::Val{Mode}, ::Val{width}, ::Val{ModifiedBetween}=Val(Mode!= API.DEM_ReverseModeCombined)) where {F, DF, A<:Annotation, TT, Mode, width, ModifiedBetween}
+@inline function thunk(f::F,df::DF, ::Type{A}, tt::Type{TT},::Val{Mode}, ::Val{width}, ::Val{ModifiedBetween}=Val(Mode != API.DEM_ReverseModeCombined)) where {F, DF, A<:Annotation, TT, Mode, width, ModifiedBetween}
     primal, adjoint = fspec(F, TT)
     target = Compiler.EnzymeTarget()
     params = Compiler.EnzymeCompilerParams(adjoint, Mode, width, A, true, DF != Nothing, #=abiwrap=#true, ModifiedBetween)
@@ -4030,7 +4029,7 @@ end
 import GPUCompiler: deferred_codegen_jobs
 
 @generated function deferred_codegen(f::F, ::Val{tt}, ::Val{rt}, ::Val{DupClosure},::Val{Mode},
-                                     ::Val{width}, ::Val{ModifiedBetween}=Val(Mode!= API.DEM_ReverseModeCombined)) where {F,tt, rt, DupClosure, Mode, width, ModifiedBetween}
+                                     ::Val{width}, ::Val{ModifiedBetween}=Val(Mode != API.DEM_ReverseModeCombined)) where {F,tt, rt, DupClosure, Mode, width, ModifiedBetween}
     primal, adjoint = fspec(F, tt)
     target = EnzymeTarget()
     params = EnzymeCompilerParams(adjoint, Mode, width, rt, true, DupClosure, #=abiwrap=#true, ModifiedBetween)
