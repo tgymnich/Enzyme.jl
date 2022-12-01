@@ -49,7 +49,7 @@ julia> Base.libllvm_version_string
 "9.0.1jl"
 ```
 
-If the LLVM version ends in a `jl` you a likely using the private LLVM.
+If the LLVM version ends in a `jl` you are likely using the private LLVM.
 
 In your source checkout of Enzyme:
 
